@@ -11,7 +11,7 @@ import { TranslationKeyStyle } from './translation/translation-key-style';
 import { createTranslation as commandCreateTranslation } from './translation/commands/translation-command-create';
 import { convertToTranslation as commandConvertToTranslation } from './translation/commands/translation-command-convert';
 import { locateTranslation as commandLocateTranslation } from './translation/commands/translation-command-locate';
-import { findTranslationFiles, isNgxTranslateProject, setExtensionEnabled } from './extension-utils';
+import { isNgxTranslateProject, setExtensionEnabled } from './extension-utils';
 import { Configuration } from './configuration-settings';
 import { Notification } from './user-notifications';
 import { commandChangeTranslation } from './translation/commands/translation-command-change';
@@ -33,7 +33,7 @@ export async function activate(context: vscode.ExtensionContext) {
         return;
     }
 
-    settings = await readSettings();
+    // settings = await readSettings();
     translationSets = new TranslationSets();
 
     registerAutocompleteProvider(context);
@@ -54,21 +54,21 @@ export async function activate(context: vscode.ExtensionContext) {
     );
 
     /* Set the currently opened file as a translation file */
-    context.subscriptions.push(
-        vscode.commands.registerTextEditorCommand('lingua.selectLocaleFile', async (editor: TextEditor) => {
-            const languageFileUri = editor.document.uri;
+    // context.subscriptions.push(
+    //     vscode.commands.registerTextEditorCommand('lingua.selectLocaleFile', async (editor: TextEditor) => {
+    //         const languageFileUri = editor.document.uri;
 
-            const language = await window.showInputBox({
-                placeHolder: "Enter a language identifier of this file (e.g. 'de' or 'en')",
-            });
-            await settings.addTranslationSet(language, languageFileUri);
-            if (translationSets.count <= 1) {
-                workspace
-                    .getConfiguration('lingua')
-                    .update('defaultLanguage', language, ConfigurationTarget.Global);
-            }
-        })
-    );
+    //         const language = await window.showInputBox({
+    //             placeHolder: "Enter a language identifier of this file (e.g. 'de' or 'en')",
+    //         });
+    //         await settings.addTranslationSet(language, languageFileUri);
+    //         if (translationSets.count <= 1) {
+    //             workspace
+    //                 .getConfiguration('lingua')
+    //                 .update('defaultLanguage', language, ConfigurationTarget.Global);
+    //         }
+    //     })
+    // );
 
     /* Create a translation for the selected translation identifier */
     context.subscriptions.push(
@@ -109,6 +109,7 @@ export async function activate(context: vscode.ExtensionContext) {
     let activeEditor = vscode.window.activeTextEditor;
 
     if (activeEditor) {
+        settings = await readSettings();
         updateTranslationSets(settings, translationSets).then(() => {
             if (activeEditor) {
                 updateTranslationDecorations(activeEditor, translationSets.default);
@@ -119,6 +120,7 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.window.onDidChangeActiveTextEditor(
         async (editor) => {
             activeEditor = editor;
+            settings = await readSettings();
             updateTranslationSets(settings, translationSets).then(() => {
                 if (activeEditor) {
                     updateTranslationDecorations(activeEditor, translationSets.default);
@@ -218,13 +220,13 @@ async function updateTranslationSets(settings: LinguaSettings, translationSets: 
     if (settings.translationFiles.length) {
         await translationSets.build(settings);
     } else {
-        const translationFileMap = await findTranslationFiles();
-        const configureAutomatically = await Notification.showInfoNoTranslationFile(translationFileMap);
-        if (configureAutomatically) {
-            translationFileMap?.forEach((fileUri, language) => {
-                settings.addTranslationSet(language, fileUri);
-            });
-        }
+        // const translationFileMap = await findTranslationFiles();
+        // const configureAutomatically = await Notification.showInfoNoTranslationFile(translationFileMap);
+        // if (configureAutomatically) {
+        //     translationFileMap?.forEach((fileUri, language) => {
+        //         settings.addTranslationSet(language, fileUri);
+        //     });
+        // }
 
         return Promise.reject();
     }

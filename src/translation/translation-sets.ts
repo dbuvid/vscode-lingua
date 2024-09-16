@@ -1,4 +1,4 @@
-import { workspace, Uri, window } from 'vscode';
+import { workspace, Uri } from 'vscode';
 import { TranslationSet } from './translation-set';
 import { LinguaSettings } from '../lingua-settings';
 import { Configuration } from '../configuration-settings';
@@ -42,17 +42,21 @@ export class TranslationSets {
         this._settings = settings;
 
         await Promise.all(
-            settings.translationFiles.map(async (localeFile) => {
+            settings.translationFiles.map(async locale => {
                 try {
-                    const absoluteUri = Uri.file(`${workspace.rootPath}/${localeFile.uri}`);
-                    await workspace.openTextDocument(absoluteUri).then((document) => {
-                        if (document) {
-                            const json = document.getText();
+                    await Promise.all(locale.files.map(localeFile => {
+                        const absoluteUri = Uri.file(`${workspace.rootPath}/${localeFile}`);
+                        return workspace.openTextDocument(absoluteUri)
+                    })).then((documents) => {
+                        if (documents) {
+                            const mergedTranslations = Object.assign({}, ...documents.map(document => JSON.parse(document.getText())))
+
                             const translationSet = new TranslationSet();
-                            translationSet.build(localeFile.lang, absoluteUri, JSON.parse(json));
-                            this._translationSets[localeFile.lang] = translationSet;
+                            translationSet.build(locale.lang, Uri.file(`${workspace.rootPath}/${locale.files[0]}`), mergedTranslations);
+                            this._translationSets[locale.lang] = translationSet;
                         }
-                    });
+                    }); 
+                    
                 } catch (e) {
                     console.error(e);
                 }

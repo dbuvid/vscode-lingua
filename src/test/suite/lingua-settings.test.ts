@@ -25,19 +25,19 @@ suite("Lingua Settings", () => {
     expect(settings).to.exist;
   });
 
-  test("add and remove translation set to settings", async () => {
-    await deleteLinguaSettings();
+  // test("add and remove translation set to settings", async () => {
+  //   await deleteLinguaSettings();
 
-    let settings: LinguaSettings = await readSettings();
-    await settings.addTranslationSet("test", vscode.Uri.parse(""));
-    settings = await readSettings();
+  //   let settings: LinguaSettings = await readSettings();
+  //   await settings.addTranslationSet("test", vscode.Uri.parse(""));
+  //   settings = await readSettings();
 
-    expect(Object.keys(settings.translationFiles).length).to.eq(1);
-    expect(Object.keys(settings.translationFiles)[0]).to.eq("test");
+  //   expect(Object.keys(settings.translationFiles).length).to.eq(1);
+  //   expect(Object.keys(settings.translationFiles)[0]).to.eq("test");
 
-    await settings.removeTranslationSet("test");
-    settings = await readSettings();
+  //   await settings.removeTranslationSet("test");
+  //   settings = await readSettings();
 
-    expect(Object.keys(settings.translationFiles).length).to.eq(0);
-  });
+  //   expect(Object.keys(settings.translationFiles).length).to.eq(0);
+  // });
 });

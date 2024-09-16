@@ -1,26 +1,28 @@
-import { Uri, workspace, window } from 'vscode';
+import * as fs from 'fs';
 import { assign } from 'lodash';
+import * as path from 'path';
+import { Uri, window, workspace } from 'vscode';
 import { Notification } from './user-notifications';
 
 var textEncoding = require('text-encoding');
 var TextEncoder = textEncoding.TextEncoder;
 
 export class LinguaSettings {
-    public translationFiles: { lang: string; uri: string }[] = [];
+    public translationFiles: { lang: string; files: string[] }[] = [];
 
-    public async addTranslationSet(language: string | undefined, fileUri: Uri) {
-        if (!language || !fileUri) {
-            return;
-        }
-        const relativePath = workspace.asRelativePath(fileUri.path);
-        const entry = this.translationFiles.find((file) => file.lang === language);
-        if (entry) {
-            entry.uri = relativePath;
-        } else {
-            this.translationFiles.push({ lang: language, uri: relativePath });
-        }
-        await writeSettings(this);
-    }
+    // public async addTranslationSet(language: string | undefined, fileUri: Uri) {
+    //     if (!language || !fileUri) {
+    //         return;
+    //     }
+    //     const relativePath = workspace.asRelativePath(fileUri.path);
+    //     const entry = this.translationFiles.find((file) => file.lang === language);
+    //     if (entry) {
+    //         entry.uri = relativePath;
+    //     } else {
+    //         this.translationFiles.push({ lang: language, uri: relativePath });
+    //     }
+    //     await writeSettings(this);
+    // }
 
     public async removeTranslationSet(language: string) {
         const filteredFiles = this.translationFiles.filter((f) => f.lang !== language);
@@ -30,15 +32,15 @@ export class LinguaSettings {
 }
 
 export async function readSettings(): Promise<LinguaSettings> {
-    if (workspace.workspaceFolders) {
-        const linguaSettingsUrl = Uri.file(`${workspace.rootPath}/.lingua`);
-
+    if (window.activeTextEditor) {
         try {
+            const currentlyOpenTabfilePath = window.activeTextEditor.document.fileName;
+            const linguaSettingsUrl = Uri.file(getClosestSettingsFilePath(currentlyOpenTabfilePath));
             const doc = await workspace.openTextDocument(linguaSettingsUrl);
             const settings = assign(new LinguaSettings(), JSON.parse(doc.getText()));
             return Promise.resolve(settings);
         } catch (e) {
-            console.debug('Could not load .lingua settings file in root directory');
+            console.debug('Could not load .lingua settings file');
         }
     }
 
@@ -57,3 +59,18 @@ async function writeSettings(settings: LinguaSettings) {
         }
     }
 }
+
+export function getClosestSettingsFilePath(filePath: string) {
+    const activeFileDirectory = path.dirname(filePath);
+
+    const files = fs.readdirSync(activeFileDirectory);
+
+    if(files.some(file => file.endsWith('.lingua'))) {
+        return path.join(activeFileDirectory, '.lingua');
+    } else if(activeFileDirectory === workspace.rootPath) {
+        return `${workspace.rootPath}/.lingua`;
+    } else {
+        const parentDir = path.join(path.dirname(filePath), '..');
+        return getClosestSettingsFilePath(parentDir);
+    }
+  }

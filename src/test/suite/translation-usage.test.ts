@@ -12,8 +12,8 @@ suite('Translation Usage', () => {
         const deFile = (await vscode.workspace.findFiles('**/src/assets/i18n/de.json', excludePattern, 1))[0];
 
         const settings: LinguaSettings = new LinguaSettings();
-        settings.translationFiles.push({ lang: 'en', uri: vscode.workspace.asRelativePath(enFile) });
-        settings.translationFiles.push({ lang: 'de', uri: vscode.workspace.asRelativePath(deFile) });
+        settings.translationFiles.push({ lang: 'en', files: [vscode.workspace.asRelativePath(enFile)] });
+        settings.translationFiles.push({ lang: 'de', files: [vscode.workspace.asRelativePath(deFile)] });
 
         const translationSets = new TranslationSets();
         await translationSets.build(settings);

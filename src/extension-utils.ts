@@ -27,23 +27,23 @@ export function setExtensionEnabled(enabled: boolean) {
 /**
  * Find translation files that follow the default pattern /i18n/_.json.
  */
-export async function findTranslationFiles(): Promise<Map<string, Uri> | undefined> {
-    const i18n = await workspace.findFiles(`**/i18n/**`, `**/node_modules/**`)
-    if (i18n.length === 0) {
-        return;
-    }
+// export async function findTranslationFiles(): Promise<Map<string, Uri> | undefined> {
+//     const i18n = await workspace.findFiles(`**/i18n/**`, `**/node_modules/**`)
+//     if (i18n.length === 0) {
+//         return;
+//     }
 
-    const translationFileMap = new Map();
-    i18n.forEach(uri => {
-        const path = uri.path;
-        const filenameWithExtension = path.substring(path.lastIndexOf('/') + 1);
+//     const translationFileMap = new Map();
+//     i18n.forEach(uri => {
+//         const path = uri.path;
+//         const filenameWithExtension = path.substring(path.lastIndexOf('/') + 1);
 
-        if (filenameWithExtension.endsWith('.json')) {
-            const languageId = filenameWithExtension.split('.')[0]
-            translationFileMap.set(languageId, uri);
-            console.log(languageId, uri);
-        }
-    });
+//         if (filenameWithExtension.endsWith('.json')) {
+//             const languageId = filenameWithExtension.split('.')[0]
+//             translationFileMap.set(languageId, uri);
+//             console.log(languageId, uri);
+//         }
+//     });
 
-    return translationFileMap.size > 0 ? translationFileMap : undefined;
-}
+//     return translationFileMap.size > 0 ? translationFileMap : undefined;
+// }

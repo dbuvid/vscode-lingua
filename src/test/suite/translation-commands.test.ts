@@ -20,7 +20,7 @@ suite('Translation Commands', () => {
 
     const buildTranslationSets = async function (uri: vscode.Uri): Promise<TranslationSets> {
         const settings: LinguaSettings = new LinguaSettings();
-        settings.translationFiles.push({ lang: 'copy', uri: vscode.workspace.asRelativePath(uri) });
+        settings.translationFiles.push({ lang: 'copy', files: [vscode.workspace.asRelativePath(uri)] });
 
         const translationSets = new TranslationSets();
         await translationSets.build(settings);
